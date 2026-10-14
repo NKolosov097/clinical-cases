@@ -580,7 +580,10 @@ const listen = async (server) => {
       assert.equal(await loading.locator("li").count(), 3);
       assert.equal(await loading.getByRole("status").textContent(), "Loading clinical cases...");
       await page.emulateMedia({ reducedMotion: "reduce" });
-      assert.equal(await loading.locator(".skeleton-line").first().evaluate(el => getComputedStyle(el).animationName), "none");
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[data-testid="catalog-loading"] .skeleton-line');
+        return el ? getComputedStyle(el).animationName === "none" : false;
+      });
       for (const width of [320, 1440]) {
         await page.setViewportSize({ width, height: 1000 });
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
