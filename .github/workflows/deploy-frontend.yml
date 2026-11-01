@@ -1,0 +1,64 @@
+
+name: Deploy frontend
+
+on:
+  workflow_run:
+    workflows: ["verify"]
+    types: [completed]
+    branches:
+      - nkolosov/eximion
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: eximion-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == 'NKolosov097/clinical-cases' &&
+      github.event.workflow_run.head_branch == 'nkolosov/eximion'
+
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout verified commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Check deployment freshness
+        id: freshness
+        env:
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          LATEST_SHA=$(git ls-remote origin refs/heads/nkolosov/eximion | cut -f1)
+          if [ "$VERIFIED_SHA" = "$LATEST_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "A newer commit exists; skipping outdated deployment."
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: steps.freshness.outputs.deploy == 'true'
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: eximion-511003
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+
+      - name: Set up Google Cloud CLI
+        if: steps.freshness.outputs.deploy == 'true'
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: eximion-511003
+
+      - name: Build and deploy frontend
+        if: steps.freshness.outputs.deploy == 'true'
+        run: bash scripts/deploy-frontend.sh
