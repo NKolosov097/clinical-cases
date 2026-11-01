@@ -10,7 +10,7 @@ const CLOUD_RUN_ALIAS = "eximion-frontend-aprnyhognq-ey.a.run.app"
 
 const VERCEL_ORIGIN = "https://clinical-cases-proxy.vercel.app"
 
-const CUSTOM_ORIGIN = "https://cases.nkolosov.com"
+const CUSTOM_ORIGIN = "https://clinical-cases.nkolosov.com"
 
 const CASE_ID = "93cb8ced-8e78-42fc-a333-e4dfbb3345a5"
 
@@ -75,11 +75,11 @@ describe("same-origin session proxy", () => {
 
     it.each([
       ["https://evil.test", CLOUD_RUN_HOST],
-      ["http://cases.nkolosov.com", CLOUD_RUN_HOST],
-      ["https://cases.nkolosov.com.evil.test", CLOUD_RUN_HOST],
+      ["http://clinical-cases.nkolosov.com", CLOUD_RUN_HOST],
+      ["https://clinical-cases.nkolosov.com.evil.test", CLOUD_RUN_HOST],
       ["https://clinical-cases-proxy.vercel.app.evil.test", CLOUD_RUN_HOST],
-      ["https://cases.nkolosov.com/", CLOUD_RUN_HOST],
-      ["https://cases.nkolosov.com/path", CLOUD_RUN_HOST],
+      ["https://clinical-cases.nkolosov.com/", CLOUD_RUN_HOST],
+      ["https://clinical-cases.nkolosov.com/path", CLOUD_RUN_HOST],
       ["null", CLOUD_RUN_HOST],
       ["", CLOUD_RUN_HOST],
       [undefined, CLOUD_RUN_HOST],
