@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server"
 
 const trustedProxyOrigins = new Set([
   "https://clinical-cases-proxy.vercel.app",
-  "https://cases.nkolosov.com",
+  "https://clinical-cases.nkolosov.com",
 ])
 
 const trustedCloudRunHosts = new Set([
